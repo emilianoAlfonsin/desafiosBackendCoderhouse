@@ -1,90 +1,64 @@
 const fs = require('fs')
-const { json } = require('stream/consumers')
 
 class ProductManager {
 
     constructor (path) {
         this.path = path
-        this.init //Invoca el método al crear la instancia
     }
 
     //Método para verificar que existe el archivo de this.path o si no exixste crearlo
-    init() {
-        try {
-            const existFile = fs.existsSync(this.path)
-            if (existFile) {
-                fs.writeFileSync(this.path, JSON.stringify([]))
-            } 
-        }
-        catch (error) {
-            console.log(error)
-        }
-    }
+    read = () => fs.existsSync(this.path)
+                ? fs.promises.readFile(this.path).then(result => JSON.parse(result))
+                : []
+
+    write = list => fs.promises.writeFile(this.path, JSON.stringify(list))
 
     //Método que lee el archivo y retorna el array de productos
-    async getProducts() {
-        try {
-            const response = await fs.promises.readFile(this.path, "utf-8")
-            return JSON.parse(response)
-        }
-        catch (error) {
-            console.log(error)
+    getProducts = async () => {
+            const list =  await this.read()
+            return list
+    }
+
+    addProduct = async (product) => {
+        const list = await this.read()
+        product.id = !list.length ? 1 : list[list.length - 1].id + 1
+
+        list.push(product)
+
+        await this.write(list)
+    }
+
+    getProductByID = async (id) => {
+        const list = await this.read()
+        const productById = list.find(prod => prod.id == id)
+
+        productById 
+        ? productById
+        : "No se encuentra el producto seleccionado"
+    }
+
+    updateProduct = async (id, product) =>{
+        product.id = id
+        const list = await this.read()
+
+        const index = list.findIndex(prod => prod.id == id)
+
+        if (index >= 0) {
+            list[index] = product
+            await this.write(list)
         }
     }
 
-    // getProductByID = (id) => {
-    //     const prodById = this.products.find((prod) => prod.id == id)
-    //     prodById 
-    //     ? console.log(prodById) 
-    //     : console.log("No se encuentra el producto seleccionado")
-    // }
+    deleteProduct = async (id) => {
+        const list = await this.read()
+        const index = list.findIndex(prod => prod.id == id)
 
-    async addProduct ({title, description, price, tumbnail, code, stock}) {
-        try{
-            if (!title || !description || !price || !tumbnail || !code || !stock) {
-                return console.log("Por favor verifique que todos los campos del producto se encuentren completos")
-            }
-    
-            const codeControl = products.find((prod) => prod.code == code )
-            if (codeControl) {
-                return console.log("El código del producto ingresado ya se encuentra en uso")
-            } 
-    
-            const product = {
-                title,
-                description,
-                price,
-                tumbnail,
-                code,
-                stock
-            }
-    
-            const products = await this.getProducts();
-            
-            product.id = !products.length
-            ? 1
-            : products[products.length - 1].id + 1
-    
-            products.push(product)
-    
-            await fs.promises.writeFile(this.path, JSON.stringify(products, null, 3))
-    
-            return product
+        if (index >= 0) {
+            list.splice(index, 1)
         }
-        catch (error) {
-            console.log(error)
-        }
+
+        await this.write(list)
     }
-
 }
 
-const manager = new ProductManager("./db-products.json")
-manager.getProducts()
-console.log(manager.products)
-manager.addProduct( "producto prueba", "Este es un producto prueba", 200, "Sin imágen", "abc123", 25)
-manager.getProducts()
-console.log(manager.products)
-manager.addProduct( "producto prueba", "Este es un producto prueba", 200, "Sin imágen", "abc123", 25)
-manager.getProducts()
-console.log(manager.products)
-// manager.getProductByID(1)
+module.exports = ProductManager
