@@ -33,8 +33,8 @@ class ProductManager {
         const productById = list.find(prod => prod.id == id)
 
         productById 
-        ? productById
-        : "No se encuentra el producto seleccionado"
+        ? console.log(productById)
+        : console.log("No se encuentra el producto seleccionado")
     }
 
     updateProduct = async (id, product) =>{
