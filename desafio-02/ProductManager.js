@@ -55,6 +55,8 @@ class ProductManager {
 
         if (index >= 0) {
             list.splice(index, 1)
+        } else {
+            console.log("El ID seleccionado no corresponde a ningún producto")
         }
 
         await this.write(list)
