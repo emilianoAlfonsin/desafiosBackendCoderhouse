@@ -1,1 +1,18 @@
-[]
+[
+   {
+      "title": "Banana",
+      "description": "Una fruta deliciosa",
+      "price": 10,
+      "stock": 10,
+      "code": "abc",
+      "id": 1
+   },
+   {
+      "title": "Manzana",
+      "description": "Una fruta deliciosa",
+      "price": 10,
+      "stock": 10,
+      "code": "qwe",
+      "id": 2
+   }
+]

@@ -3,6 +3,9 @@ import { productManager } from "./Managers/index.js";
 
 const app = express();
 
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
+
 const PORT = 8080;
 
 app.get("/api/products", async(req, res) => {
@@ -49,6 +52,23 @@ app.get("/api/products/:id", async (req, res) => {
         console.log(error)
 
         res.send({success: false, error: "Ha ocurrido un error"})
+    }
+})
+
+app.post("/api/products", async(req, res) => {
+    try {
+        const {title, description, price, code, stock} = req.body
+
+        if (!title || !description|| !price|| !code|| !stock) {
+            res.send({success: true, error: "Todas las variables son requeridas"})
+        }
+
+        const savedProduct = await productManager.addProduct({ title, description, price, code, stock })
+
+        res.send({success: true, product: savedProduct})
+
+    } catch (error) {
+        console.log(error)
     }
 })
 

@@ -34,7 +34,7 @@ export class ProductManager {
         const newProduct = {title, description, price, stock, code}
         const productsList = await this.getProducts()
 
-        const existCode = productsList.some(product => product.code = code)
+        const existCode = productsList.some((product) => product.code === code)
 
         if (existCode) {
             throw new Error("El código no pude repetirse")
@@ -46,5 +46,7 @@ export class ProductManager {
 
         await fs.promises.writeFile(this.path, JSON.stringify(productsList, null, 3))
     }
+
+    
 
 }
