@@ -1,4 +1,5 @@
 import fs from "fs"
+import { NotFoundError, ValidationError } from "../utils/index.js"
 
 export class ProductManager {
     constructor(path) {
@@ -16,6 +17,10 @@ export class ProductManager {
         catch (error ) {
             console.log(error)
         }
+    }
+
+    #writeFile(data) {
+        return fs.promises.writeFile(this.path, JSON.stringify(data, null, 3))
     }
 
     async getProducts() {
@@ -37,16 +42,42 @@ export class ProductManager {
         const existCode = productsList.some((product) => product.code === code)
 
         if (existCode) {
-            throw new Error("El código no pude repetirse")
+            throw new ValidationError("El código no pude repetirse")
         }
 
         newProduct.id = !productsList.length ? 1 : productsList[productsList.length - 1].id + 1
 
         productsList.push(newProduct)
 
-        await fs.promises.writeFile(this.path, JSON.stringify(productsList, null, 3))
+        await this.#writeFile(productsList)
     }
 
-    
+    async update(id, newData) {
+        const products = await this.getProducts()
+
+        const productIdx = products.findIndex(prod => prod.id === id)
+
+        if (productIdx === -1) throw new NotFoundError  ("El producto no fue encontrado")
+
+        const product = products[productIdx]
+
+        products[productIdx] = {...product, ...newData}
+
+        await this.#writeFile(products)
+    }
+
+    async delete (id) {
+        const products = await this.getProducts()
+
+        const productIdx = products.findIndex(prod => prod.id === id)
+
+        if (productIdx === -1) throw new NotFoundError  ("El producto no fue encontrado")
+
+        const deletedProducts = products.splice(productIdx, 1)
+
+        await this.#writeFile(products)
+
+        return deletedProducts[0]
+    }
 
 }
